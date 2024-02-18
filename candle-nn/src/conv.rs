@@ -109,6 +109,14 @@ impl ConvTranspose1d {
     pub fn config(&self) -> &ConvTranspose1dConfig {
         &self.config
     }
+
+    pub fn weight(&self) -> &Tensor {
+        &self.weight
+    }
+
+    pub fn bias(&self) -> Option<&Tensor> {
+        self.bias.as_ref()
+    }
 }
 
 impl crate::Module for ConvTranspose1d {
@@ -258,6 +266,14 @@ impl ConvTranspose2d {
     pub fn config(&self) -> &ConvTranspose2dConfig {
         &self.config
     }
+
+    pub fn weight(&self) -> &Tensor {
+        &self.weight
+    }
+
+    pub fn bias(&self) -> Option<&Tensor> {
+        self.bias.as_ref()
+    }
 }
 
 impl crate::Module for ConvTranspose2d {
@@ -300,6 +316,22 @@ pub fn conv1d(
     };
     let bs = vb.get_with_hints(out_channels, "bias", init_bs)?;
     Ok(Conv1d::new(ws, Some(bs), cfg))
+}
+
+pub fn conv1d_no_bias(
+    in_channels: usize,
+    out_channels: usize,
+    kernel_size: usize,
+    cfg: Conv1dConfig,
+    vb: crate::VarBuilder,
+) -> Result<Conv1d> {
+    let init_ws = crate::init::DEFAULT_KAIMING_NORMAL;
+    let ws = vb.get_with_hints(
+        (out_channels, in_channels / cfg.groups, kernel_size),
+        "weight",
+        init_ws,
+    )?;
+    Ok(Conv1d::new(ws, None, cfg))
 }
 
 pub fn conv_transpose1d(
